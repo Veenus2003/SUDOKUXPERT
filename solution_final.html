@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Solution</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        /* Add your styles for displaying the solution here */
+        .home-icon {
+            position: absolute;
+            top: 0;
+            right: 0;
+            float: right;
+            margin: 10px;
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+        }
+        .home-icon-container {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .home-icon:hover {
+            color: #eb5555;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin: 0 auto;
+        }
+        td {
+            width: 60px;
+            height: 60px;
+            text-align: center;
+            border: 1px solid rgb(7, 47, 103);
+            background-color: rgb(118, 225, 242);
+            color: black;
+            font-weight: bold;
+            font-size: 24px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        body {
+            height: 80vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: url(image/conny-schneider-xuTJZ7uD7PI-unsplash.jpg);
+            background-size: cover;
+            
+        }
+        .container {
+            text-align: center;
+            color: white;
+            margin-top: 5px; /* Add some top margin to move the content down */
+        }
+        h1 {
+            margin-bottom: 10px; /* Decrease the bottom margin */
+            margin-top: 10;
+            padding-top: 50px; /* Reset the top margin */
+        }
+        p {
+            font-size: 18px;
+            margin-bottom: 20px;
+            font-family: 'Times New Roman', Times, serif;
+        }
+        .learn-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .learn-button:hover {
+            background-color: darkblue;
+        }
+
+        
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  background-color: rgb(255, 255, 254);
+  color: black;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+.close {
+  color: #d83232;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+    </style>
+</head>
+<body>
+    
+    <div class="home-icon-container">
+        <a href="front2.html" class="home-icon"><i class="fa-solid fa-house"></i></a>
+    </div>
+    <div class="container">
+        <h1>Sudoku Solution</h1>
+        <table id="solution-board"></table>
+        <p>Hope you've acquired a new approach to tackling Sudoku puzzles and gained insight into the functionality of this Coloring Algorithm!!</p>
+        <button class="learn-button" onclick="openModal()">Yes, I learned</button>
+        <!-- HTML -->
+<div id="myModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <p id="modal-message">Kudos to you!Keep Learning !!! &#128513;</p>
+    </div>
+  </div>
+  
+    </div>
+
+    <script>
+        // Sudoku data
+        const sudokuData = [
+            [1, 2, 3, 4],
+            [3, 4, 1, 2],
+            [2, 1, 4, 3],
+            [4, 3, 2, 1]
+        ];
+
+        // Function to display the Sudoku solution on the page
+        function displaySolution() {
+            const table = document.getElementById('solution-board');
+
+            // Populate the table with the solution data
+            for (let i = 0; i < 4; i++) {
+                const row = table.insertRow();
+                for (let j = 0; j < 4; j++) {
+                    const cellValue = sudokuData[i][j];
+                    const cellText = cellValue === 0 ? '' : cellValue;
+                    const cell = row.insertCell();
+                    cell.textContent = cellText;
+                }
+            }
+        }
+
+        // Call the function to display the solution when the page loads
+        displaySolution();
+
+        // JavaScript
+// Get the modal
+var modal = document.getElementById("myModal");
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks the button, open the modal 
+function openModal() {
+  modal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the modal
+function closeModal() {
+  modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+  if (event.target == modal) {
+    closeModal();
+  }
+}
+
+    </script>
+</body>
+</html>

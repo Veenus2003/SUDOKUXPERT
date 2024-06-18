@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithm Visualizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+           /* .high-contrast{
+                filter: contrast(500%);
+            }*/
+          
+       /*  background-color: rgb(255, 239, 13);*/
+           
+           /* background-color: rgb(253, 253, 253);*/
+            margin: 0;
+            padding: 0;
+            /*font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;8/  */
+            background-image: url('image/pexels-gdtography-277628-950241.jpg');
+            background-size: cover; 
+            background-position: center; 
+          
+        }
+        .navbar {
+            background-color: #000000;
+            overflow: hidden;
+        }
+        .navbar a {
+            float: left;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 20px;
+            text-decoration: none;
+            
+        }
+        .navbar a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        .welcome-message {
+   /*background-color: rgba(255, 255, 255, 0.4);*/
+   
+    color: #000000;
+    text-align: center;
+    height: 700px;
+    width: 1300px;
+    margin: 0 auto; /* Set top and bottom margin to 0, and auto for left and right */
+   padding-top: 60px;
+}
+ p {
+    font-size: 20px;
+ }
+    </style>
+</head>
+<body>
+   
+    <div class="navbar">
+        <a href="front2.html" onclick="loadContent('home')">HOME</a>
+        <a href="dsat_sudo.html" onclick="loadContent('sorting')">DSATUR</a>
+        <a href="greedy_sudo.html" onclick="loadContent('searching')">GREEDY</a>
+        <a href="sudo_test.html">WELSH POWELL</a>
+        
+        <a href="genetic_sudoku.html" onclick="loadContent('searching')">GENETIC</a>
+        <a href="compare.html">PERFORMANCE ANALYSIS OF COLORING ALGORITHMS</a>
+    </div>
+    <div class="welcome-message">
+        <h1>WELCOME TO SUDOKUXPERT </h1>
+        <p>🎉 Welcome to the realm of SUDOKUXPERT! 🎨<br>
+
+            Dive into the fascinating world where Sudoku puzzles meet the power of graph theory and the ingenuity of genetic algorithms. Ever wondered how solving Sudoku can lead you through the intricate pathways of graph coloring algorithms or the evolutionary strategies of genetic algorithms? Well, you're in the right place!? Well, you're in the right place!<br>
+            
+            Here's how it works: You start with a classic Sudoku puzzle, a grid of numbers that seems like a simple challenge. But hold on tight! Behind every Sudoku lies a hidden graph, waiting to be unraveled. By converting the Sudoku grid into a graph representation, we unlock the door to a world of colorful possibilities.<br>
+            
+            Our platform doesn't stop there! Alongside graph coloring techniques, we also utilize cutting-edge genetic algorithm to solve Sudoku puzzles. This algorithm mimic the process of natural selection to evolve solutions, offering an alternative approach to conquering Sudoku challenges.<br>
+            
+            Whether you're fascinated by graph theory, intrigued by genetic algorithms, or simply love a good Sudoku puzzle, our platform invites you to embark on a thrilling journey of discovery.<br>
+            
+            So, what are you waiting for? Let's transform Sudoku into a canvas for creativity, logic, and the fascinating world of algorithms!<br>
+            
+            </p>
+            
+            <h2>Happy Learning!</h2>
+    </div>
+    <!-- Content Placeholder -->
+    <div id="content">
+        <!-- Content of each page will be dynamically loaded here -->
+        
+            
+       
+    </div>
+
+    
+    <script>
+        // Function to load content of each page
+        function loadContent(page) {
+            // Load content based on selected page
+            switch(page) {
+                case 'home':
+                    document.getElementById('content').innerHTML = "";
+                    break;
+                case 'sorting':
+                    document.getElementById('content').innerHTML = "<h2>Sorting Algorithms</h2><p>Explore various sorting algorithms here.</p>";
+                    break;
+                case 'searching':
+                    document.getElementById('content').innerHTML = "<h2>Searching Algorithms</h2><p>Discover different searching algorithms here.</p>";
+                    break;
+                default:
+                    document.getElementById('content').innerHTML = "<h2>404 - Page Not Found</h2><p>The page you are looking for does not exist.</p>";
+            }
+        }
+
+        // Load default content on page load
+        window.onload = function() {
+            loadContent('home'); // Load home page by default
+        };
+    </script>
+</body>
+</html>

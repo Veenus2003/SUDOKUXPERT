@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUDOKU GENERATOR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Jaro:opsz@6..72&family=Jersey+15&family=Oswald:wght@200..700&family=Whisper&display=swap" rel="stylesheet">
+    <style>
+        
+
+
+        table {
+            border-collapse: collapse;
+        }
+        td {
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            border: 1px solid white;
+        }
+        button {
+            margin-top: 60px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff; /* Button background color */
+            color: #fff; /* Button text color */
+            border: none; /* Remove button border */
+            border-radius: 5px; /* Add rounded corners */
+            cursor: pointer; /* Show pointer cursor on hover */
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* Add box shadow */
+            transition: background-color 0.3s, color 0.3s; 
+        }
+        button:hover {
+            background-color: #0056b3; 
+        }
+
+        button:focus {
+    outline: none; /* Remove focus outline */
+}
+        body {
+    height: 100%;
+    margin: 0;
+    background-image: url(image/conny-schneider-xuTJZ7uD7PI-unsplash.jpg);
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+   /* animation: backgroundScroll 50s linear infinite;
+}
+
+@keyframes backgroundScroll {
+    0%,100% {
+        background-position: 0% 0%; 
+    }
+    50% {
+        background-position: 0% 100%; 
+    }*/
+}
+.container {
+    display: flex;
+    text-align: center;
+    position: relative;
+}
+
+#sudoku-container {
+    position: absolute; /* Set position to absolute */
+    top: 90%; /* Position from the top */
+    left: 30%;
+    margin-top: 20px;  /*Adjust margin as needed */
+}
+
+
+        h1 {
+    color: white; 
+    text-align: center; 
+    font-size: 75px; 
+    font-family: 'Jaro', sans-serif; /* Specify the font names */
+    margin-top: 20px; 
+    text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5); /* Add a subtle white text shadow */
+    background: linear-gradient(to right, #f6fafa, #007bff); /* Apply a gradient background */
+    background-clip: text;
+    -webkit-text-fill-color: transparent; 
+}
+     
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SUDOKU GENERATOR</h1>
+        <div id="sudoku-container">
+            <table id="sudoku-board"></table>
+            <button id="solve-button">SOLVE</button>
+        </div>
+    <script>
+        class SudokuGenerator {
+            constructor() {
+                this.board = [...Array(4)].map(() => Array(4).fill(0));
+                this.generateBoard();
+            }
+
+            generateBoard() {
+                this.solve();
+                this.removeCells();
+            }
+
+            solve() {
+                const emptyCells = [];
+                for (let i = 0; i < 4; i++) {
+                    for (let j = 0; j < 4; j++) {
+                        if (this.board[i][j] === 0) {
+                            emptyCells.push([i, j]);
+                        }
+                    }
+                }
+                if (emptyCells.length === 0) {
+                    return true;
+                }
+                const [row, col] = emptyCells[0];
+                for (let num = 1; num <= 4; num++) {
+                    if (this.isValid(row, col, num)) {
+                        this.board[row][col] = num;
+                        if (this.solve()) {
+                            return true;
+                        }
+                        this.board[row][col] = 0;
+                    }
+                }
+                return false;
+            }
+
+            isValid(row, col, num) {
+                for (let i = 0; i < 4; i++) {
+                    if (this.board[row][i] === num || this.board[i][col] === num) {
+                        return false;
+                    }
+                }
+                const startRow = 2 * Math.floor(row / 2);
+                const startCol = 2 * Math.floor(col / 2);
+                for (let i = startRow; i < startRow + 2; i++) {
+                    for (let j = startCol; j < startCol + 2; j++) { // Change this line
+                        if (this.board[i][j] === num) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+
+            removeCells() {
+                const emptyCells = [];
+                for (let i = 0; i < 4; i++) {
+                    for (let j = 0; j < 4; j++) {
+                        emptyCells.push([i, j]);
+                    }
+                }
+                const cellsToRemove = this.shuffle(emptyCells).slice(0, 10); // Reduced to 10 for clarity
+                cellsToRemove.forEach(([row, col]) => {
+                    this.board[row][col] = 0;
+                });
+            }
+
+            shuffle(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+        }
+
+        class SudokuGUI {
+            constructor() {
+                this.sudokuGenerator = new SudokuGenerator();
+                this.createBoard();
+                this.setupEventHandlers();
+            }
+
+            createBoard() {
+                const table = document.getElementById('sudoku-board');
+                for (let i = 0; i < 4; i++) {
+                    const row = table.insertRow();
+                    for (let j = 0; j < 4; j++) {
+                        const cellValue = this.sudokuGenerator.board[i][j];
+                        const cellText = cellValue === 0 ? '' : cellValue;
+                        const cell = row.insertCell();
+                        cell.textContent = cellText;
+                        cell.style.backgroundColor = cellValue === 0 ? 'lightblue' : 'white';
+                        cell.style.color = 'black';
+                        cell.style.fontWeight = 'bold';
+                        cell.style.fontSize = '24px';
+                        cell.style.height = '60px'; 
+                        cell.style.width = '60px'; 
+
+                        cell.style.textAlign = 'center';
+                        cell.style.border = '1px solid Blue';
+                       // cell.style.border = '2px solid #000'; // Thick black border for cells
+                        cell.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)'; // Add shadow effect
+                        cell.style.transition = 'background-color 0.3s'; // Smooth transition for background color change on hover
+
+                    }
+                }
+            }
+
+            setupEventHandlers() {
+                const solveButton = document.getElementById('solve-button');
+                solveButton.addEventListener('click', () => {
+                    // Redirect to another page
+                    window.location.href = 'welsh_powell1.html?board=' + JSON.stringify(this.sudokuGenerator.board);
+                });
+            }
+        }
+
+        // Create Sudoku GUI instance
+        new SudokuGUI();
+    </script>
+</body>
+</html>
