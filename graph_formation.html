@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Grid and Corresponding Graph Visualization</title>
+    <script type="text/javascript" src="https://visjs.github.io/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        #sudoku-container {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #sudoku-grid, #corresponding-graph {
+            width: 60%;
+            height: 500px;
+            border: 1px solid #ccc;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            line-height: 50px;
+            text-align: center;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            font-size: 16px;
+            transition: background-color 0.5s ease;
+            cursor: pointer;
+        }
+
+        .highlight {
+            background-color: #ffcc00 !important;
+        }
+
+        #message {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        #startButton, #completeButton {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="sudoku-container">
+        <div id="sudoku-grid"></div>
+        <div id="corresponding-graph"></div>
+    </div>
+    <div id="message"></div>
+    <button id="startButton">Start Animation</button>
+    <button id="completeButton">Complete Edge Formation</button>
+
+    <script>
+        function createSudokuGrid() {
+            let nodes = [];
+            let edges = [];
+
+            // Create nodes for each cell in the Sudoku grid
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    nodes.push({ id: `${i}-${j}`, label: `${i}-${j}`, x: i * 100, y: j * 100 });
+                }
+            }
+
+            // Create edges for each row and column
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    for (let k = 0; k < 4; k++) {
+                        if (k !== j) edges.push({ from: `${i}-${j}`, to: `${i}-${k}`, color: '#999' });
+                        if (k !== i) edges.push({ from: `${i}-${j}`, to: `${k}-${j}`, color: '#999' });
+                    }
+                }
+            }
+
+            // Create edges for each subgrid
+            for (let i = 0; i < 4; i += 2) {
+                for (let j = 0; j < 4; j += 2) {
+                    for (let k = i; k < i + 2; k++) {
+                        for (let l = j; l < j + 2; l++) {
+                            for (let m = i; m < i + 2; m++) {
+                                for (let n = j; n < j + 2; n++) {
+                                    if (!(k === m && l === n)) edges.push({ from: `${k}-${l}`, to: `${m}-${n}`, color: '#999' });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return { nodes: nodes, edges: edges };
+        }
+
+        function animateGraphFormation() {
+            let container = document.getElementById('corresponding-graph');
+            let data = { nodes: [], edges: [] };
+            let options = {};
+            let network = new vis.Network(container, data, options);
+
+            let sudokuData = createSudokuGrid();
+            let message = document.getElementById('message');
+            let selectedCells = [];
+
+            // Highlight each cell in the Sudoku grid one by one
+            let sudokuGridCells = document.querySelectorAll('.cell');
+            let step = 0;
+            let interval = setInterval(() => {
+                if (step < sudokuGridCells.length) {
+                    sudokuGridCells[step].classList.add('highlight');
+                    setTimeout(() => {
+                        sudokuGridCells[step].classList.remove('highlight');
+                    }, 500);
+                    data.nodes.push(sudokuData.nodes[step]);
+                    network.setData(data);
+                    network.redraw();
+                    step++;
+                } else {
+                    clearInterval(interval);
+                    step = 0;
+                    // After completing node formation, remove highlights and start forming edges
+                    removeHighlights();
+                    document.getElementById('sudoku-grid').addEventListener('click', cellClickHandler);
+                }
+            }, 1000);
+
+            function removeHighlights() {
+                sudokuGridCells.forEach(cell => {
+                    cell.classList.remove('highlight');
+                });
+            }
+
+            function cellClickHandler(event) {
+                let cell = event.target;
+                if (cell.classList.contains('cell')) {
+                    if (!cell.classList.contains('highlight')) {
+                        cell.classList.add('highlight');
+                        selectedCells.push(cell.textContent);
+                        if (selectedCells.length === 2) {
+                            let from = selectedCells[0];
+                            let to = selectedCells[1];
+                            let edgeExists = checkEdgeExistence(from, to);
+                            let edgeExists2 = checkEdgeExistence2(from, to);
+                            if (edgeExists) {
+                                if(!edgeExists2){
+                                    data.edges.push({ from: from, to: to, color: '#ffcc00' });
+                                    message.textContent = `Edge formed between ${from} and ${to}`;
+                                }
+                                else{
+                                     message.textContent = `Edge already exists between ${from} and ${to}`;
+                                }
+                            }
+                            else {
+                                message.textContent = `No edge exists between ${from} and ${to}`;
+                            }
+                            network.setData(data);
+                            network.redraw();
+                            selectedCells = []; // Reset selected cells array
+                            removeHighlights();
+                        }
+                    }
+                }
+            }
+
+            function checkEdgeExistence(from, to) {
+                return sudokuData.edges.some(edge => {
+                    return (edge.from === from && edge.to === to) || (edge.from === to && edge.to === from);
+                });
+            }
+            function checkEdgeExistence2(edges, from, to) {
+    return edges.some(edge => {
+        return (edge.from === from && edge.to === to) || (edge.from === to && edge.to === from);
+    });
+}
+
+        }
+
+        // Function to complete the edge formation automatically
+        // Function to complete the edge formation automatically
+function completeEdgeFormation() {
+    let sudokuData = createSudokuGrid();
+    let data = { edges: [] };
+    let edgesToCreate = [];
+
+    // Filter out edges that do not already exist
+    for (let i = 0; i < sudokuData.edges.length; i++) {
+        let edge = sudokuData.edges[i];
+        if (!checkEdgeExistence2(data.edges, edge.from, edge.to)) {
+            edgesToCreate.push(edge);
+        }
+    }
+
+    // Add the filtered edges to the network
+    let network = new vis.Network(document.getElementById('corresponding-graph'), { nodes: [], edges: data.edges }, {});
+    edgesToCreate.forEach(edge => {
+        data.edges.push(edge);
+        network.setData({ nodes: [], edges: data.edges });
+    });
+}
+
+        // Event listeners for buttons
+        document.getElementById('startButton').addEventListener('click', animateGraphFormation);
+        document.getElementById('completeButton').addEventListener('click', completeEdgeFormation);
+
+        // Function to create a blank Sudoku grid
+        function createBlankSudokuGrid() {
+            let sudokuGrid = document.getElementById('sudoku-grid');
+            let html = '<table>';
+            for (let i = 0; i < 4; i++) {
+                html += '<tr>';
+                for (let j = 0; j < 4; j++) {
+                    html += `<td class="cell">${i}-${j}</td>`;
+                }
+                html += '</tr>';
+            }
+            html += '</table>';
+            sudokuGrid.innerHTML = html;
+        }
+
+        createBlankSudokuGrid();
+    </script>
+</body>
+</html>
