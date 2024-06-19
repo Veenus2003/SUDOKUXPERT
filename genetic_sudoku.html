@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Generator</title>
+    <style>
+        /* CSS styles */
+       /* body {
+            background-image: url('image/conny-schneider-xuTJZ7uD7PI-unsplash.jpg'); 
+            background-size: cover;
+            background-position: center;  
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 0;  
+        }
+        */
+        #sudoku-board {
+            margin: 0 auto; /* Center the table horizontally */
+            width: 50%; /* Set the width of the table */
+            max-width: 800px; /* Set a maximum width */
+            height: 400px;
+            border-collapse: collapse; /* Collapse borders */
+        }
+
+        #sudoku-board td {
+            height: 30px; 
+            width: 30px;
+            text-align: center; 
+            vertical-align: middle; 
+            font-weight: bold;
+            font-size: 20px;
+            border: 1px solid black; 
+        }
+
+        #sudoku-board td.zero {
+            background-color: lightgray; /* Set background color for empty cells */
+        }
+
+        #solve-button {
+            display: block;
+            margin: 20px auto; 
+            font-size: 16px;
+            background-color: #007bff; 
+            color: #fff; /* Button text color */
+            border: none; /* Remove button border */
+            border-radius: 5px; /* Add rounded corners */
+            cursor: pointer; /* Show pointer cursor on hover */
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* Add box shadow */
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">Sudoku</h1>
+    <table id="sudoku-board"></table>
+    <button id="solve-button">Solve</button>
+    <div style="display: flex; justify-content: center; align-items: center;">
+        <label for="generation-size">Generation Size:</label>
+        <input type="number" id="generation-size" value="2">
+        <label for="population-size">Population Size:</label>
+        <input type="number" id="population-size" value="5">
+    </div>
+    <div id="warning-message" style="color: red; display: none;">Please enter a value greater than or equal to zero for population and generation size.</div>
+    <script>
+        // JavaScript code here
+        class SudokuGenerator {
+            constructor() {
+                this.board = [...Array(4)].map(() => Array(4).fill(0));
+                this.generateBoard();
+            }
+
+            generateBoard() {
+                this.solve();
+                this.removeCells();
+            }
+
+            solve() {
+                const emptyCells = [];
+                for (let i = 0; i < 4; i++) {
+                    for (let j = 0; j < 4; j++) {
+                        if (this.board[i][j] === 0) {
+                            emptyCells.push([i, j]);
+                        }
+                    }
+                }
+                if (emptyCells.length === 0) {
+                    return true;
+                }
+                const [row, col] = emptyCells[0];
+                for (let num = 1; num <= 4; num++) {
+                    if (this.isValid(row, col, num)) {
+                        this.board[row][col] = num;
+                        if (this.solve()) {
+                            return true;
+                        }
+                        this.board[row][col] = 0;
+                    }
+                }
+                return false;
+            }
+
+            isValid(row, col, num) {
+                for (let i = 0; i < 4; i++) {
+                    if (this.board[row][i] === num || this.board[i][col] === num) {
+                        return false;
+                    }
+                }
+                const startRow = 2 * Math.floor(row / 2);
+                const startCol = 2 * Math.floor(col / 2);
+                for (let i = startRow; i < startRow + 2; i++) {
+                    for (let j = startCol; j < startCol + 2; j++) { // Change this line
+                        if (this.board[i][j] === num) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+
+            removeCells() {
+                const emptyCells = [];
+                for (let i = 0; i < 4; i++) {
+                    for (let j = 0; j < 4; j++) {
+                        emptyCells.push([i, j]);
+                    }
+                }
+                const cellsToRemove = this.shuffle(emptyCells).slice(0, 10); // Reduced to 10 for clarity
+                cellsToRemove.forEach(([row, col]) => {
+                    this.board[row][col] = 0;
+                });
+            }
+
+            shuffle(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+        }
+
+        class SudokuGUI {
+            constructor() {
+                this.sudokuGenerator = new SudokuGenerator();
+                this.createBoard();
+                this.setupEventHandlers();
+            }
+
+            createBoard() {
+                const table = document.getElementById('sudoku-board');
+                for (let i = 0; i < 4; i++) {
+                    const row = table.insertRow();
+                    for (let j = 0; j < 4; j++) {
+                        const cellValue = this.sudokuGenerator.board[i][j];
+                        const cellText = cellValue === 0 ? '' : cellValue;
+                        const cell = row.insertCell();
+                        cell.textContent = cellText;
+                        cell.style.backgroundColor = cellValue === 0 ? 'lightgray' : 'white';
+                        cell.style.color = 'black';
+                        cell.style.fontWeight = 'bold';
+                        cell.style.fontSize = '20px';
+                        cell.style.textAlign = 'center';
+                        cell.style.border = '1px solid black';
+                    }
+                }
+            }
+
+            setupEventHandlers() {
+                // Function to generate Sudoku puzzle and pass it to genetic algorithm
+               /* const generateAndSolveSudoku = () => {
+                    let puzzle = this.sudokuGenerator.board; // Get the generated puzzle
+                    let puzzleString = JSON.stringify(puzzle); // Convert puzzle to a string
+                    localStorage.setItem('sudokuPuzzle', puzzleString); // Store puzzle in localStorage
+                    window.location.href = 'ga_imp_new.html'; // Redirect to genetic algorithm page
+                };*/
+
+                // Button click event handler
+                //const solveButton = document.getElementById('solve-button');
+                //solveButton.addEventListener('click', generateAndSolveSudoku);
+                // Button click event handler
+                const solveButton = document.getElementById('solve-button');
+                solveButton.addEventListener('click', () => {
+                let generationSize = parseInt(document.getElementById('generation-size').value);
+                let populationSize = parseInt(document.getElementById('population-size').value);
+               //if(generationSize<0||populationSize<0)
+                //{
+                  //  warningMessage.style.display='block';
+                //}
+                //else
+                //{
+                    //warningMessage.style.display='none';
+                    let puzzle = this.sudokuGenerator.board; // Get the generated puzzle
+                    let puzzleString = JSON.stringify(puzzle); // Convert puzzle to a string
+                    localStorage.setItem('sudokuPuzzle', puzzleString); // Store puzzle in localStorage
+                    localStorage.setItem('generationSize', generationSize); // Store generation size
+                    localStorage.setItem('populationSize', populationSize); // Store population size
+                    window.location.href = 'genetic.html'; // Redirect to genetic algorithm page
+                //}
+            });
+
+          }
+        
+            /*const solveButton = document.getElementById('solve-button');
+            const generationSizeInput = document.getElementById('generation-size');
+            const populationSizeInput = document.getElementById('population-size');
+            const warningMessage = document.getElementById('warning-message');
+
+            solveButton.addEventListener('click', () => {
+                const generationSize = parseInt(generationSizeInput.value);
+                const populationSize = parseInt(populationSizeInput.value);
+
+                if (generationSize < 0 || populationSize < 0) {
+                    warningMessage.style.display = 'block';
+                } else {
+                    warningMessage.style.display = 'none';
+                    let puzzle = sudokuGUI.sudokuGenerator.board; // Get the generated puzzle
+                    let puzzleString = JSON.stringify(puzzle); // Convert puzzle to a string
+                    localStorage.setItem('sudokuPuzzle', puzzleString); // Store puzzle in localStorage
+                    localStorage.setItem('generationSize', generationSize); // Store generation size
+                    localStorage.setItem('populationSize', populationSize); // Store population size
+                    window.location.href = 'ga_imp_new.html'; // Redirect to genetic algorithm page
+                }
+            });*/
+        }
+
+        // Create Sudoku GUI instance
+        const sudokuGUI = new SudokuGUI();
+
+    </script>
+</body>
+</html>
