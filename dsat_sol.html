@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Solution</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        /* Add your styles for displaying the solution here */
+        body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: black; /* Set background color to black */
+        }
+
+        .container {
+            /* text-align: center;*/
+            position: relative;
+        }
+
+        h1 {
+            color: #4CAF50; /* Set heading color to green */
+            font-family: Arial, sans-serif;
+        }
+
+        .home-icon {
+            position: absolute;
+            top: 0;
+            right: 0;
+            float: right;
+            margin: 10px;
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .home-icon-container {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        td {
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <div class="home-icon-container">
+        <a href="front2.html" class="home-icon"><i class="fa-solid fa-house"></i></a>
+    </div>
+    <div class="container">
+        <h1>Sudoku Solution</h1>
+        <table id="solution-board"></table>
+    </div>
+
+    <script>
+        // Sudoku data
+        const sudokuData = [
+            [1, 2, 3, 4],
+            [3, 4, 1, 2],
+            [2, 1, 4, 3],
+            [4, 3, 2, 1]
+        ];
+
+        // Function to display the Sudoku solution on the page
+        function displaySolution() {
+            const table = document.getElementById('solution-board');
+
+            // Clear the table
+            table.innerHTML = '';
+
+            // Populate the table with the solution data
+            for (let i = 0; i < 4; i++) {
+                const row = table.insertRow();
+                for (let j = 0; j < 4; j++) {
+                    const cellValue = sudokuData[i][j];
+                    const cellText = cellValue === 0 ? '' : cellValue;
+                    const cell = row.insertCell();
+                    cell.textContent = cellText;
+                    cell.style.backgroundColor = 'lightblue';
+                    cell.style.color = 'black';
+                    cell.style.fontWeight = 'bold';
+                    cell.style.fontSize = '24px';
+                    cell.style.height = '60px'; 
+                    cell.style.width = '60px'; 
+                    cell.style.textAlign = 'center';
+                    cell.style.border = '1px solid Blue';
+                    cell.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                }
+            }
+        }
+
+        // Call the function to display the solution when the page loads
+        displaySolution();
+    </script>
+</body>
+</html>

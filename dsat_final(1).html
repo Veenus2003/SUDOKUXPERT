@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4x4 Sudoku Graph</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" /> 
+
+    <script type="text/javascript" src="https://visjs.github.io/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        #sudoku-graph {
+            width: 400px;
+            height: 400px;
+            border: 1px solid #ccc;
+            margin-top: 20px;
+            background-color: black;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+
+
+
+        .saturation-board {
+            position: absolute;
+            top: 90px;
+            /* padding-top: 20px;*/
+            right: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            color: white; /* Set text color to white */
+            margin-right: 40px;
+        }
+        .saturation-table {
+            margin-right: 90;
+            /*margin-left: 50px;*/
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .saturation-table th, .saturation-table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+            color: white; /* Set text color to white */
+        }
+        .saturation-table th {
+            background-color: #f2f2f2;
+            color: black;
+        }
+        .digit-color {
+            
+            margin-top: 20px;
+            margin-right: 190px;
+        }
+        .digit-color span {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+           
+            margin-left: 2px;
+        }
+        .sudoku-grid {
+            display: grid;
+            grid-template-columns: repeat(4, auto);
+            grid-gap: 5px;
+            justify-content: center;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .sudoku-cell {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #390b39;
+            font-size: 18px;
+            background-color: white;
+            color: black;
+            backdrop-filter: blur(10px); 
+        }
+        button {
+            margin-top: 60px;
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-left: 50px;
+            background-color: rgb(71, 8, 70); /* Button background color */
+            color: #fff; /* Button text color */
+            border: none; /* Remove button border */
+            border-radius: 5px; /* Add rounded corners */
+            cursor: pointer; /* Show pointer cursor on hover */
+            box-shadow: 0px 2px 4px rgba(231, 115, 115, 0.1); /* Add box shadow */
+            transition: background-color 0.3s, color 0.3s; 
+            justify-content: space-between;
+        }
+        .description {
+            text-align: center;
+            margin-top: 50px; /* Adjust the value to increase or decrease the space */
+          /*   margin-bottom: 40px; Optional: Add margin at the bottom if needed */
+            height: 450px;  
+            background-color: rgb(136, 106, 115);
+            color: black;
+            padding-top: 60px;
+            border: 3px solid transparent;
+            
+       
+       }
+
+        .full {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            padding-top: 50px;
+            background-color: rgb(136, 106, 115);
+            height: 650px;
+            border: 3px solid transparent;
+        }
+  
+        .full:hover {
+        border-color: rgb(231, 231, 231);
+       }
+
+       .description:hover {
+        border-color: rgb(242, 242, 242);
+       }
+        
+        .home-icon {
+            position: absolute;
+            top: 15px;
+            right: 20;
+            float: right;
+            margin: 10px;
+            font-size: 24px;
+            color: rgb(236, 224, 224);
+            cursor: pointer;
+        }
+
+        .home-icon-container {
+            display: flex;
+            justify-content: flex-end;
+           
+            background-color: white;
+            display: flex;
+    
+            margin-right: 10px; 
+    
+
+        }
+
+        .home-icon:hover {
+           color: rgb(157, 103, 172);
+        }
+
+        .foot-panel1 {
+    height: 60px;
+    background-color:rgb(0, 0, 0); 
+    border-bottom: 0.5px solid black;
+    display: flex;
+    color: rgb(255, 255, 255);
+    font-weight: bold;
+    align-items: center;
+    justify-content: center;
+}
+@keyframes move {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(1000px); } 
+            100% { transform: translateX(0); }
+        }
+
+        .link-text {
+            color: #9f48a3;
+            display: inline-block;
+            animation: move 50s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <h1>DSATUR ALGORITHM</h1>
+    <div class="home-icon-container">
+        <a href="front2.html" class="home-icon"><i class="fa-solid fa-house"></i></a>
+    </div>
+    <div class="full">
+        <div class="sudoku-container">
+            <div class="sudoku-graph" id="sudoku-graph" ></div>
+        
+            <div class="button-container">
+                <button id="color-graph-button">Color Graph</button>
+                <button id="view-solution-button">View Solution</button>
+                  
+            </div>
+            </div>
+        <div class="sudoku-grid" id="sudoku-grid"></div>
+            <div class="saturation-board">
+                <h3>Saturation Values</h3>
+                <table class="saturation-table">
+                    <thead>
+                        <tr>
+                            <th>Node</th>
+                            <th>Saturation</th>
+                        </tr>
+                    </thead>
+                    <tbody id="saturation-values"></tbody>
+                </table>
+            </div>
+        
+            <div class="digit-color">
+                <h3>Digit-Color Map</h3>
+                <div id="digit-colors"></div>
+            </div>
+        
+            
+    </div>
+
+    <!-- View Solution button -->
+    <p>
+        <a href="graph.html" class="link-text" id="moving-link">CLICK HERE TO SEE THE GRAPH FORMATION</a>
+    </p>
+    
+    <div class="description">
+        <h2>DESCRIPTION</h2>
+        <p>The DSATUR algorithm is a graph coloring algorithm that assigns colors to vertices of a graph in such a way that no two adjacent vertices share the same color.</p>
+        <p>It works by selecting vertices with the maximum saturation degree (the number of different colors used by its neighbors) and then colors them with the least used color.</p>
+        <p>DSATUR is a greedy algorithm known for its efficiency in practice.</p>
+
+        <h3>TIME COMPLEXITY</h3>
+        <p><strong>Best Case:</strong> O(n log n)</p>
+        <p><strong>Average Case:</strong> O(n log n)</p>
+        <p><strong>Worst Case:</strong> O(n^2)</p>
+    </div>
+
+    <script>
+        // Get Sudoku puzzle data from the URL
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const sudokuBoardData = JSON.parse(urlParams.get('board'));
+
+        // Create an array to store nodes and edges of the Sudoku grid graph
+        let nodes = [];
+        let edges = [];
+
+        // Create nodes for each cell in the Sudoku grid
+        for (let i = 0; i < 4; i++) {
+            for (let j = 0; j < 4; j++) {
+                const cellValue = sudokuBoardData[i][j];
+                nodes.push({ id: `${i}-${j}`, label: `${i}-${j}`, color: { background: cellValue === 0 ? 'lightgray' : getColor(cellValue) }, value: cellValue });
+            }
+        }
+
+        // Create edges for each row and column
+        for (let i = 0; i < 4; i++) {
+            for (let j = 0; j < 4; j++) {
+                for (let k = 0; k < 4; k++) {
+                    if (k !== j) edges.push({ from: `${i}-${j}`, to: `${i}-${k}` });
+                    if (k !== i) edges.push({ from: `${i}-${j}`, to: `${k}-${j}` });
+                }
+            }
+        }
+
+        // Create edges for each subgrid
+        for (let i = 0; i < 4; i += 2) {
+            for (let j = 0; j < 4; j += 2) {
+                for (let k = i; k < i + 2; k++) {
+                    for (let l = j; l < j + 2; l++) {
+                        for (let m = i; m < i + 2; m++) {
+                            for (let n = j; n < j + 2; n++) {
+                                if (!(k === m && l === n)) edges.push({ from: `${k}-${l}`, to: `${m}-${n}` });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Create a network visualization
+        let container = document.getElementById('sudoku-graph');
+        let data = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
+        let options = {};
+        let network = new vis.Network(container, data, options);
+
+        // Helper function to get color based on number in Sudoku puzzle
+        function getColor(cellValue) {
+            const colors = ['#FF5733', '#33FF57', '#5733FF', '#FFFF33'];
+            return colors[cellValue - 1];
+        }
+
+        // Function to color the graph using DSatur algorithm
+        function dsaturColoring() {
+            
+            let saturationDegree = {}; // Object to store saturation degree of nodes
+            let usedColors = {}; // Object to store used colors
+
+            // Initialize saturation degree and used colors
+            nodes.forEach(node => {
+                saturationDegree[node.id] = 0;
+                usedColors[node.id] = false;
+                network.getConnectedNodes(node.id).forEach(neighborId => {
+                    if (usedColors[neighborId] !== false) {
+                        saturationDegree[node.id]++;
+                    }
+                });
+            });
+
+            // Sort nodes by saturation degree and number of used colors
+            nodes.sort((a, b) => {
+                if (saturationDegree[b.id] !== saturationDegree[a.id]) {
+                    return saturationDegree[b.id] - saturationDegree[a.id];
+                }
+                return network.getConnectedNodes(b.id).length - network.getConnectedNodes(a.id).length;
+            });
+
+            // Animate the coloring process
+            let delay = 3000; // Delay between coloring steps (in milliseconds)
+            nodes.forEach((node, index) => {
+                setTimeout(() => {
+                    let availableColors = {}; // Object to store available colors for the node
+                    network.getConnectedNodes(node.id).forEach(neighborId => {
+                        let neighborColor = usedColors[neighborId];
+                        if (neighborColor !== false) {
+                            availableColors[neighborColor] = true;
+                        }
+                    });
+
+                    // Find the first available color for the node
+                    let color;
+                    for (color = 0; ; color++) {
+                        if (!availableColors[color]) {
+                            break;
+                        }
+                    }
+
+                    // Assign the color to the node
+                    usedColors[node.id] = color;
+
+                    // Apply color to the node
+                    node.color = { background: getColor(color + 1) };
+                    data.nodes.update(node);
+
+                    // Update saturation values
+                    network.getConnectedNodes(node.id).forEach(neighborId => {
+                        updateSaturation(neighborId, 1);
+                    });
+
+                    // Update the display of saturation values
+                    updateSaturationValues();
+                }, index * delay);
+            });
+
+        }
+
+        // Initialize saturation values for each node
+        let saturationValues = {};
+        nodes.forEach(node => {
+            saturationValues[node.id] = 0;
+        });
+
+        // Display saturation values
+        let saturationTBody = document.getElementById('saturation-values');
+
+        function updateSaturationValues() {
+            saturationTBody.innerHTML = '';
+            nodes.forEach(node => {
+                let row = document.createElement('tr');
+                row.innerHTML = `<td>${node.id}</td><td>${Math.min(saturationValues[node.id], 3)}</td>`;
+                saturationTBody.appendChild(row);
+            });
+        }
+
+        // Function to update saturation values during the coloring process
+        function updateSaturation(nodeId, increment) {
+            saturationValues[nodeId] += increment;
+            updateSaturationValues();
+        }
+
+        // Function to display digit-color mapping
+        function displayDigitColorMapping() {
+            const digitColorMapping = [
+                { digit: 1, color: '#FF5733' },
+                { digit: 2, color: '#33FF57' },
+                { digit: 3, color: '#5733FF' },
+                { digit: 4, color: '#FFFF33' }
+            ];
+
+            let digitColorDiv = document.getElementById('digit-colors');
+            digitColorMapping.forEach(mapping => {
+                let span = document.createElement('span');
+                span.style.backgroundColor = mapping.color;
+                digitColorDiv.appendChild(span);
+                digitColorDiv.appendChild(document.createTextNode(`Digit ${mapping.digit}`));
+                digitColorDiv.appendChild(document.createElement('br'));
+            });
+        }
+
+        // Display digit-color mapping
+        displayDigitColorMapping();
+
+        // Create Sudoku grid
+        let sudokuGrid = document.getElementById('sudoku-grid');
+        for (let i = 0; i < 4; i++) {
+            for (let j = 0; j < 4; j++) {
+                const cellValue = sudokuBoardData[i][j];
+                let cell = document.createElement('input');
+                cell.setAttribute('type', 'number');
+                cell.setAttribute('min', '1');
+                cell.setAttribute('max', '4');
+                cell.setAttribute('class', 'sudoku-cell');
+                cell.setAttribute('id', `cell-${i}-${j}`);
+                cell.value = cellValue !== 0 ? cellValue : '';
+                cell.disabled = cellValue !== 0; // Disable prefilled cells
+                
+                sudokuGrid.appendChild(cell);
+            }
+        }
+
+        // Setup event handler for the "Color Graph" button
+        document.getElementById('color-graph-button').addEventListener('click', () => {
+            // Call function to color the graph using DSATUR algorithm
+            dsaturColoring();
+        });
+
+        // Setup event handler for the "View Solution" button
+        document.getElementById('view-solution-button').addEventListener('click', () => {
+            // Redirect to uicorrectedfile3.html
+            window.location.href = 'solution_final.html';
+        });
+    </script>
+     <footer>
+        <div class="foot-panel1">SUDOKUXPERT</div>
+    </footer>
+</body>
+</html>
