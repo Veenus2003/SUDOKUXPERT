@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genetic Sudoku</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" /> 
+
+    <style>
+        body {
+            background-image: url('pic.jpg'); /* Set the background image */
+            background-size: cover; /* Cover the entire background */
+            background-position: center; /* Center the background image */
+            font-family: Arial, sans-serif; /* Set a fallback font */
+            margin: 0; /* Remove default margin */
+            padding: 0; /* Remove default padding */
+           /* font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;*/
+            background-color: rgb(255, 251, 251);
+        }
+
+        #container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        #output {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            overflow-y: auto;
+            max-height: 400px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+        }
+
+        .cell {
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            font-size: 16px;
+            
+        }
+
+        .row{
+            display: flex;
+        }
+
+        .conflicts {
+            color: red;
+        }
+
+        .home-icon {
+            position: absolute;
+            top: 15px;
+            right: 20;
+            float: right;
+            margin: 10px;
+            font-size: 24px;
+            color: rgb(0, 0, 0);
+            cursor: pointer;
+        }
+
+        .home-icon-container {
+            display: flex;
+            justify-content: flex-end;
+           
+            background-color: rgb(0, 0, 0);
+            display: flex;
+    
+            margin-right: 10px; 
+    
+
+        }
+
+        .home-icon:hover {
+           color: rgb(227, 18, 18);
+        }
+
+        .foot-panel1 {
+    height: 60px;
+    background-color:rgb(0, 0, 0); 
+    border-bottom: 0.5px solid black;
+    display: flex;
+    color: rgb(255, 255, 255);
+    font-weight: bold;
+    align-items: center;
+    justify-content: center;
+}
+    </style>
+</head>
+<body>
+    <div class="home-icon-container">
+        <a href="front2.html" class="home-icon"><i class="fa-solid fa-house"></i></a>
+    </div>
+    <div id="container">
+        <h1>Genetic algorithm</h1>
+        <div id="output"></div>
+    </div>
+    <div id="container">
+        <h1>Genetic algorithm</h1>
+        <div id="output"></div>
+        <div id="description">
+            <h2>Detailed Description</h2>
+            <p>Genetic algorithm is a metaheuristic optimization algorithm inspired by the process of natural selection and genetics. It is commonly used to solve optimization and search problems by mimicking the process of natural selection.</p>
+            <p>In a genetic algorithm, a population of candidate solutions (individuals) evolves over generations. Each individual represents a possible solution to the problem. The algorithm iteratively applies selection, crossover, and mutation operators to create a new generation of individuals. The fitness of each individual is evaluated, and higher fitness individuals are more likely to be selected for reproduction.</p>
+            <p>The process continues until a termination condition is met, such as reaching a maximum number of generations or finding a satisfactory solution.</p>
+        </div>
+    </div>
+    
+    <script>
+        function printToOutput(content) {
+            // Function definition
+            let outputDiv = document.getElementById('output');
+            outputDiv.innerHTML += content + '<br>';
+        }
+
+        function printGrid(grid) {
+            // Function definition
+            let output = '';
+            grid.forEach(row => {
+                output += '<div class="row">';
+                row.forEach(cell => {
+                    output += `<div class="cell">${cell}</div>`;
+                });
+                output += '</div>';
+            });
+            return output;
+        }
+
+        function shuffleArray(array) {
+            // Function definition
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function generateIndividual(initialPuzzle) {
+            // Function definition
+            let grid = initialPuzzle.map(row => [...row]);
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    if (grid[i][j] === 0) {
+                        grid[i][j] = Math.floor(Math.random() * 4) + 1;
+                    }
+                }
+            }
+            return grid;
+        }
+
+        function fitness(grid) {
+            // Function definition
+            let conflicts = 0;
+            grid.forEach(row => {
+                conflicts += row.length - new Set(row).size;
+            });
+            for (let col = 0; col < 4; col++) {
+                let columnValues = grid.map(row => row[col]);
+                conflicts += columnValues.length - new Set(columnValues).size;
+            }
+            for (let i = 0; i < 4; i += 2) {
+                for (let j = 0; j < 4; j += 2) {
+                    let subgridValues = [];
+                    for (let x = i; x < i + 2; x++) {
+                        for (let y = j; y < j + 2; y++) {
+                            subgridValues.push(grid[x][y]);
+                        }
+                    }
+                    conflicts += subgridValues.length - new Set(subgridValues).size;
+                }
+            }
+            return conflicts;
+        }
+
+        function crossover(parent1, parent2) {
+            // Function definition
+            let crossoverPoint = Math.floor(Math.random() * 4);
+            let child = parent1.slice(0, crossoverPoint).concat(parent2.slice(crossoverPoint));
+            return child;
+        }
+
+        function mutate(individual) {
+            // Function definition
+            return individual;
+        }
+
+        function geneticAlgorithm(initialPuzzle,generationSize,populationSize) {
+            // Genetic algorithm logic using initialPuzzle
+            //let initialPuzzle = generatePuzzle();
+            //let populationSize = 5;
+            let mutationRate = 0.1;
+           // let generations = 2;
+
+            let population = Array.from({ length: populationSize }, () => generateIndividual(initialPuzzle));
+
+            printToOutput('<strong>Initial Population:</strong><br>');
+            population.forEach((individual, idx) => {
+                printToOutput(`<strong>Sudoku Grid ${idx + 1}:</strong><br>`);
+                printToOutput(printGrid(individual));
+                printToOutput('<br>');
+            });
+
+            let solutionFound = false;
+            for (let generation = 0; generation < generationSize; generation++) {
+                let fitnessScores = population.map(individual => [individual, fitness(individual)]);
+                var sortedPopulation = fitnessScores.slice().sort((a, b) => a[1] - b[1]);
+
+                sortedPopulation.forEach((individual, idx) => {
+                    printToOutput(`<strong>Sudoku Grid ${idx + 1} (Generation ${generation + 1}):</strong><br>`);
+                    printToOutput(printGrid(individual[0]));
+                    printToOutput(`Number of conflicts: <span class="conflicts">${individual[1]}</span><br><br>`);
+                });
+
+                let parents = sortedPopulation.slice(0, populationSize / 2).map(pair => pair[0]);
+                printToOutput(`<strong>Generation ${generation + 1} Parents:</strong><br>`);
+                parents.forEach((parent, idx) => {
+                    printToOutput(`<strong>Parent ${idx + 1}:</strong><br>`);
+                    printToOutput(printGrid(parent));
+                    printToOutput('<br>');
+                });
+
+                let nextGeneration = [];
+                while (nextGeneration.length < populationSize) {
+                    let [parent1, parent2] = parents.slice().sort(() => Math.random() - 0.5).slice(0, 2);
+                    let child = crossover(parent1, parent2);
+                    if (Math.random() < mutationRate) {
+                        child = mutate(child);
+                    }
+                    nextGeneration.push(child);
+                }
+
+                population = nextGeneration;
+
+                // Check for solution
+                if (fitness(sortedPopulation[0][0]) === 0) {
+                    solutionFound = true;
+                    break;
+                }
+            }
+
+            // Print the solution
+            if (solutionFound) {
+               printToOutput('<strong>Solution found:</strong><br>');
+               printToOutput(printGrid(sortedPopulation[0][0]));
+            } else {
+                printToOutput('<strong>No solution found within the specified generations.The best solution is</strong><br>');
+                printToOutput(printGrid(sortedPopulation[0][0]));
+            }
+        }
+
+        function loadSudokuPuzzle() {
+            let puzzleString = localStorage.getItem('sudokuPuzzle'); // Retrieve puzzle from localStorage
+            /*if (puzzleString) {
+                let puzzle = JSON.parse(puzzleString); // Parse puzzle from string
+                geneticAlgorithm(puzzle); // Pass puzzle to genetic algorithm function
+            } else {
+                console.error('Sudoku puzzle not found!');
+            }*/
+            let generationSize = parseInt(localStorage.getItem('generationSize')); // Retrieve generation size
+             let populationSize = parseInt(localStorage.getItem('populationSize')); // Retrieve population size
+            if (puzzleString && !isNaN(generationSize) && !isNaN(populationSize)) {
+                let puzzle = JSON.parse(puzzleString); // Parse puzzle from string
+                geneticAlgorithm(puzzle, generationSize, populationSize); // Pass puzzle and parameters to genetic algorithm function
+            } else {
+                console.error('Sudoku puzzle or parameters not found!');
+            }
+        }
+
+
+
+        // Call the function to load puzzle and start genetic algorithm
+        loadSudokuPuzzle();
+    </script>
+     <footer>
+        <div class="foot-panel1">SUDOKUXPERT</div>
+    </footer>
+</body>
+</html>
